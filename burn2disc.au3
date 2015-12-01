@@ -1,6 +1,6 @@
 ; burn2disc
 ; Version 1.0
-; November 29, 2015
+; November 30, 2015
 ; Copyright 2015 by Jamal Mazrui
 ; GNU Lesser General Public License (LGPL)
 
@@ -105,7 +105,13 @@ const $IMAPI_MEDIA_TYPE_MAX = 0x13
 #ce
 
 func _getErrorMessage($iError)
+static $bInitialized = false
 local $s = ""
+
+if not $bInitialized then
+_setConstants()
+$bInitialized = true
+endIf
 
 switch $iError
 case $E_IMAPI_BURN_VERIFICATION_FAILED
@@ -681,7 +687,8 @@ endFunc
 func _initEraseFromDrive($sDrive)
 local $oReturn = _createDiscErase()
 $oReturn.ClientName = "burn2disc"
-if not isObj($oRecorder) then $oRecorder = _initRecorderFromDrive($sDrive)
+; if not isObj($oRecorder) then $oRecorder = _initRecorderFromDrive($sDrive)
+$oRecorder = _initRecorderFromDrive($sDrive)
 $oReturn.recorder = $oRecorder
 return $oReturn
 EndFunc
@@ -1047,24 +1054,30 @@ local $sMountPoint, $sPath, $sUniqueID
 
 
 $oDevices = _createDiscDevices()
-_output("Is Supported Environment: " & $oDevices.IsSupportedEnvironment)
+; _output("Is Supported Environment: " & $oDevices.IsSupportedEnvironment)
 
 for $sUniqueID in $oDevices
 $oRecorder = _createDiscRecorder()
 $oRecorder.InitializeDiscRecorder( $sUniqueID )
 
-_output("ActiveRecorderId: " & $oRecorder.ActiveDiscRecorder)
-_output("Vendor Id: " & $oRecorder.VendorId)
-_output("Product Id: " & $oRecorder.ProductId)
-_output("Product Revision: " & $oRecorder.ProductRevision)
-_output("VolumeName: " & $oRecorder.VolumeName)
-_output("Can Load Media: " & $oRecorder.DeviceCanLoadMedia)
-_output("Legacy Device Number: " & $oRecorder.LegacyDeviceNumber)
-
-_output("")
 For $sMountPoint in $oRecorder.volumePathNames
 _output("Mount Point: " & $sMountPoint)
+_output("")
 Next
+
+_output("ActiveRecorderId: " & $oRecorder.ActiveDiscRecorder)
+_output("")
+_output("Vendor Id: " & $oRecorder.VendorId)
+_output("")
+_output("Product Id: " & $oRecorder.ProductId)
+_output("")
+_output("Product Revision: " & $oRecorder.ProductRevision)
+_output("")
+_output("VolumeName: " & $oRecorder.VolumeName)
+_output("")
+_output("Can Load Media: " & $oRecorder.DeviceCanLoadMedia)
+_output("")
+_output("Legacy Device Number: " & $oRecorder.LegacyDeviceNumber)
 
 ; not useful output without more translations from numbers to words
 #CS
@@ -1249,7 +1262,6 @@ local $aPaths
 local $iPath, $iParamCount
 local $sDir, $sDrive, $sSpec, $sTask
 
-_setConstants()
 $burn2disc_Error = ObjEvent("AutoIt.Error", "_burn2disc_COM_Error")
 
 $iParamCount = $CMDLine[0]
